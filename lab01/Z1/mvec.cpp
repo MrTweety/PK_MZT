@@ -1,19 +1,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  mvec.cpp
 
-////////////////////////////////////////////////////////////////////////////////
-//  mvec.cpp
-
 #include "stdafx.h"
 #include<iostream>
 #include <emmintrin.h>
 #include <intrin.h>
 #include "inc_head.h"
+#include <memory.h>
 
 using namespace std;
 
+//jak dzia³a uk³ad pamieci, dlaczego usówac skoki, potokowosc, dlaczego rozwijamy petle?
+
 void matvec_orgin(double* a, double* x, double* y, int n)
 {
+	//liczba odczytow stron pamiêci n^2
 	int i, j;
 
 	for(i=0;i<n;i++){
@@ -24,14 +25,23 @@ void matvec_orgin(double* a, double* x, double* y, int n)
 	}
 }
 
-
 void matvec_opt_1(double* a, double* x, double* y, int n)
 /*=========================================================================
 Usuniecie skokow w danych
 ===========================================================================*/
 {
-	//napisz swoj kod
-	
+	//liczba odczytow stron pamiêci n^2/M (M liczba s³ów na stronie) << n^2
+
+	memset((void*)y, 0, _msize((void*)y));
+	int i, j, ij=0;
+
+	for (j = 0; j < n; ++j) {
+		for (i = 0; i < n; ++i) {
+			//ij = n*(j-1)+i-1
+			y[i] += a[ij] * x[j];
+			++ij;
+		}
+	}
 }
 
 void matvec_opt_2(double* a, double* x, double* y, int n)
@@ -39,7 +49,39 @@ void matvec_opt_2(double* a, double* x, double* y, int n)
 Rozwijanie petli
 =============================================================================*/
 {
-	//napisz swoj kod
+	int i, j,rest = n % 8, ij = 0;
+	register double z;
+	rest = n % 8; 
+	//memset((void*)y, 0, _msize((void*)y));
+	memset((void*)y, 0, n * sizeof(double));
+
+	for (j = 0; j < n; ++j) {
+		z = x[j];
+		for (i = 0; i < n-rest; i+=16) {
+			y[i] += a[ij] * z;//x[j];
+			y[i + 1] += a[ij + 1] * z; //x[j];
+			y[i + 2] += a[ij + 2] * z; //x[j];
+			y[i + 3] += a[ij + 3] * z; //x[j];
+			y[i + 4] += a[ij + 4] * z; //x[j];
+			y[i + 5] += a[ij + 5] * z; //x[j];
+			y[i + 6] += a[ij + 6] * z; //x[j];
+			y[i + 7] += a[ij + 7] * z; //x[j];
+			y[i + 8] += a[ij + 8] * z; //x[j];
+			y[i + 9] += a[ij + 9] * z; //x[j];
+			y[i + 10] += a[ij + 10] * z; //x[j];
+			y[i + 11] += a[ij + 11] * z; //x[j];
+			y[i + 12] += a[ij + 12] * z; //x[j];
+			y[i + 13] += a[ij + 13] * z; //x[j];
+			y[i + 14] += a[ij + 14] * z; //x[j];
+			y[i + 15] += a[ij + 15] * z; //x[j];
+
+			ij+=16;
+		}
+		for (; i < n; ++i) {
+			y[i] += a[ij++] * z;
+
+		}
+	}
 
 }
 
@@ -272,9 +314,9 @@ void matvec_opt_5(double* a, double* x, double* y, int n, int lb)
 			ra2 = _mm256_load_pd(ptr_a + mr);
 			ra3 = _mm256_load_pd(ptr_a + mr + 4);
 			
-			ra0 = _mm256_mul_pd(ra0, rx0);
+			ra0 = _mm256_mul_pd(ra0, rx0);// suma nieparzystych 
 			ra1 = _mm256_mul_pd(ra1, rx0);
-			ra2 = _mm256_mul_pd(ra2, rx1);
+			ra2 = _mm256_mul_pd(ra2, rx1);// suma parzystuch iteraci
 			ra3 = _mm256_mul_pd(ra3, rx1);
 			
 			ry0 = _mm256_add_pd(ry0, ra0);
@@ -341,7 +383,7 @@ void matvec_opt_5(double* a, double* x, double* y, int n, int lb)
 			ry3 = _mm256_add_pd(ry3, ra3);
 		}
 
-		ry0 = _mm256_add_pd(ry0, ry2);
+		ry0 = _mm256_add_pd(ry0, ry2);// nieparzyste + parzyste 
 		ry1 = _mm256_add_pd(ry1, ry3);
 		_mm256_store_pd(ptr_y, ry0);
 		_mm256_store_pd(ptr_y + 4, ry1);
@@ -398,7 +440,7 @@ void matvec_opt_6(double* a, double* x, double* y, int n, int lb)
 			ra2 = _mm256_load_pd(ptr_a + mr);
 			ra3 = _mm256_load_pd(ptr_a + mr + 4);
 
-			ry0 = _mm256_fmadd_pd(ra0, rx0, ry0);
+			ry0 = _mm256_fmadd_pd(ra0, rx0, ry0); // ra0 * rx0 +ry0
 			ry1 = _mm256_fmadd_pd(ra1, rx0, ry1);
 			ry2 = _mm256_fmadd_pd(ra2, rx1, ry2);
 			ry3 = _mm256_fmadd_pd(ra3, rx1, ry3);
