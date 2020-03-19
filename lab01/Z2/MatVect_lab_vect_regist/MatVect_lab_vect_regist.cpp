@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
 	}
 	cout << "\n";
 	prepare(a, x, n);
+
+	tstart = 0;
 	tstart = GetTickCount();
 	matvec_XMM(a, x, y, n, lb);
 	elaps_time = (double)(GetTickCount()-tstart)/1000.0;
@@ -138,7 +140,7 @@ void prepare(double *a, double *x, int n)
 				a[ij] = (double)(i+1);
 		}
 
-		x[i] = 1.0;
+		x[i] = 1;
 	}
 }
 
