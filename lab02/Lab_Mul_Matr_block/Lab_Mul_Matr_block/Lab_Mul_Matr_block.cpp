@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
 	dgemm_naiv_seq_HP(M, N, K, A, B, CC);
 	elapsed = (double)(GetTickCount() - ts) / 1000.0;
-	cout << "dgemm_naiv_seq_HP: duration = " << elapsed << " s\n";
+	//cout << "dgemm_naiv_seq_HP: duration = " << elapsed << " s\n";
 
 	omp_set_num_threads(np);
 	ts = GetTickCount();
