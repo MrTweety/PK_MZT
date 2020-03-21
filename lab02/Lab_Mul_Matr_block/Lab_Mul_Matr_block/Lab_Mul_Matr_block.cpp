@@ -73,8 +73,11 @@ int main(int argc, char* argv[])
 			B[jk] = (double)j + (double)k + 1.0;
 		}
 	}
+	ts = GetTickCount();
 
 	dgemm_naiv_seq_HP(M, N, K, A, B, CC);
+	elapsed = (double)(GetTickCount() - ts) / 1000.0;
+	//cout << "dgemm_naiv_seq_HP: duration = " << elapsed << " s\n";
 
 	omp_set_num_threads(np);
 	ts = GetTickCount();
@@ -111,6 +114,7 @@ void dgemm_naiv_seq_HP(int M, int N, int K, double* A, double* B, double* C)
  sequential algorithm
 ============================================================================*/
 {
+
 	int i, j, k;
 	register double r;
 
@@ -136,9 +140,10 @@ void dgemm_naiv_HP(int M, int N, int K, double* A, double* B, double* C)
 {
 	int i, j, k;
 	register double r;
-
 	memset((void*)C, 0, M * N * sizeof(double));
 
+	// #pragma omp parallel for firstprivate(i, j, k,r) shared(A, B,C) schedule(dynamic)
+	#pragma omp parallel for firstprivate(i, j, k,r) shared(A, B,C) schedule(static)
 	for (i = 0; i < M; ++i)
 	{
 		for (k = 0; k < K; ++k)
