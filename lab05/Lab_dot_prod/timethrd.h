@@ -17,6 +17,11 @@ struct THREAD_DATA
 	double *X;       //vector X - read only
 	double *Y;       //vector Y - read only
 	double res;      //dot product for subvectors
+	char add[64];
 };
 
+typedef DWORD(*FUN_THRD)(LPVOID lpParam);
+
 DWORD WINAPI ThreadFunc1(LPVOID lpParam );
+DWORD WINAPI ThreadFunc2(LPVOID lpParam);
+DWORD WINAPI ThreadFuncFMA(LPVOID lpParam);
