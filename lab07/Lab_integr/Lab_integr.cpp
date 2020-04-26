@@ -17,7 +17,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << "RELEASE VERSION\n";
 #endif
 
-	int ndiv, ip, np;
+	int ndiv, ip, max_np;
 	double a, b = 0.01, c, dx;
 	double elaps;
 	double s=0.0, s_exact, err;
@@ -28,66 +28,105 @@ int _tmain(int argc, _TCHAR* argv[])
 	CThreadTime thrd_timer[NUMB_THREADS];
 	THREAD_DATA tDat[NUMB_THREADS];
 
-	cout << "Compute numerically: Integral[0, a]{exp(-b*x)*cos(c*x)*dx}\n";
-	cout << " [0, a] - limit of integration\n";
+	//cout << "Compute numerically: Integral[0, a]{exp(-b*x)*cos(c*x)*dx}\n";
+	//cout << " [0, a] - limit of integration\n";
 
-	cout << "input a,  c, ndiv\n";
-	cin >> a >> c >> ndiv;
-	cout << "input number of threads np\n";
-	cin >> np;
+	//cout << "input a,  c, ndiv\n";
+	//cin >> a >> c >> ndiv;
+
+
+
+	cout << "input max number of threads np\n";
+	cin >> max_np;
 	
-	start = clock();
+	for (int np = 1; np <= max_np; ++np) {
+		a = 1; c = 1000;
+		s = 0.0; b = 0.01;
+		ndiv = 1000000;
+		start = clock();
 
-	ip = ndiv/np;
-	ndiv = ip*np;
-	dx = a/ndiv;
+		ip = ndiv / np;
+		ndiv = ip * np;
+		dx = a / ndiv;
 
-	cout << "Input data:\n";
-	cout << " a    = " << a << endl;
-	cout << " b    = " << b << endl;
-	cout << " c    = " << c << endl;
-	cout << " ndiv = " << ndiv << endl;
-	cout << " np   = " << np << endl;
+		cout << "\n\nInput data:\n";
+		cout << " a    = " << a << endl;
+		cout << " b    = " << b << endl;
+		cout << " c    = " << c << endl;
+		cout << " ndiv = " << ndiv << endl;
+		cout << " np   = " << np << endl;
 
-	//stworzyc np potokow potomnych i przekazac im dane
-	//zawiesic potok pierwotny dokad potoki robocze nie skancza obliczen
-
-	//Check
-	bool IsOK = true;
-	for(ip=0; ip<np; ip++)
-	{
-		if(tDat[ip].ret != 0)
+		//stworzyc np potokow potomnych i przekazac im dane
+		for (int ip = 0; ip < np; ip++)
 		{
-			cout << " Thread # " << ip+1 << " failed" << endl;
-			IsOK = false;
+			tDat[ip].thrd_timer = &thrd_timer[ip + 1];
+			tDat[ip].a = a;
+			tDat[ip].b = b;
+			tDat[ip].c = c;
+
+			tDat[ip].np = np;
+			tDat[ip].ndiv = ndiv / np;
+			tDat[ip].ip = ip;
+			tDat[ip].dx = dx;
+			tDat[ip].p_fun = fun;
+
+			if ((hThread[ip] = CreateThread(NULL, 0, ThreadFunc1, (PVOID)&tDat[ip],
+				0, &ThreadID[ip])) == NULL) {
+				cout << "create thread error\n";
+				system("pause");
+				exit(1);
+			}
 		}
+
+		//zawiesic potok pierwotny dokad potoki robocze nie skancza obliczen
+		WaitForMultipleObjects(np, hThread, TRUE, INFINITE);
+
+		//Check
+		bool IsOK = true;
+		for (ip = 0; ip < np; ip++)
+		{
+			if (tDat[ip].ret != 0)
+			{
+				cout << " Thread # " << ip + 1 << " failed" << endl;
+				IsOK = false;
+			}
+			CloseHandle(hThread[ip]);
+		}
+
+		if (!IsOK)
+		{
+			system("pause");
+			exit(1);
+		}
+
+		//ThreadTime
+		ThreadTimeInfo(np, thrd_timer);
+
+		//reduction
+		//napisac kod : podsumowac dzialalnosc kazdego potoku
+		//i przypisac ten wynik do zmiennej s
+		for (int i = 0; i < np; i++)
+		{
+			s += tDat[i].s;
+		}
+
+		end = clock();
+		elaps = (double)(end - start) / CLOCKS_PER_SEC;
+		cout << "Commercial time: " << elaps << " s" << endl;
+
+		//sprawdzenie dokladnosci: s_exact - wynik dokladny
+		//                         s - wynik calkowania numerycznego
+		s_exact = exact(a, b, c);
+		cout << "s = " << s << " s_exact = " << s_exact << endl;
+
+		err = (s - s_exact) / s_exact;
+		err = sqrt(err * err);
+
+		cout << "dx/a = " << dx / a << "  err = " << err << endl;
+		if (err > 1.0e-6)
+			cout << "too large error!!!!!!!\n";
+
 	}
-
-	if(!IsOK)
-	{
-		system("pause");
-		exit(1);
-	}
-
-	//ThreadTime
-	ThreadTimeInfo(np, thrd_timer);
-	
-	//reduction
-	//napisac kod : podsumowac dzialalnosc kazdego potoku
-	//i przypisac ten wynik do zmiennej s
-	
-	end = clock();
-	elaps = (double)(end-start)/CLOCKS_PER_SEC;
-	cout << "Commercial time: " << elaps << " s" << endl;
-
-	//sprawdzenie dokladnosci: s_exact - wynik dokladny
-	//                         s - wynik calkowania numerycznego
-	s_exact = exact(a, b, c);
-	err = (s-s_exact)/s_exact;
-	err = sqrt(err*err);
-	cout << "dx/a = " << dx/a << "  err = " << err << endl;
-	if(err > 1.0e-6)
-		cout << "too large error!!!!!!!\n";
 	system("pause");
 
 	return 0;

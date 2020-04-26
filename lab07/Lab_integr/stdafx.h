@@ -5,7 +5,7 @@
 
 #pragma once
 
-#define NUMB_THREADS 10
+#define NUMB_THREADS 64
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include <stdio.h>

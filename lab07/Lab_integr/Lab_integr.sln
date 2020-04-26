@@ -1,20 +1,31 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lab_integr", "Lab_integr.vcproj", "{F7C59988-340E-463B-BC31-7EA341E13DB2}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lab_integr", "Lab_integr.vcxproj", "{F7C59988-340E-463B-BC31-7EA341E13DB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Debug|Win32.Build.0 = Debug|Win32
+		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Debug|x64.ActiveCfg = Debug|x64
+		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Debug|x64.Build.0 = Debug|x64
 		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Release|Win32.ActiveCfg = Release|Win32
 		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Release|Win32.Build.0 = Release|Win32
+		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Release|x64.ActiveCfg = Release|x64
+		{F7C59988-340E-463B-BC31-7EA341E13DB2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B968FBD-851B-4C9F-BF7C-B202D4A1CFFD}
 	EndGlobalSection
 EndGlobal
